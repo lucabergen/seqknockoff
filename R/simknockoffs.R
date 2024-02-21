@@ -35,7 +35,7 @@ knockoffs_seq <- function(X, seq_simulator = sim_EN, ...) {
   for (i in shf) {
 
     y <- X[[i]] # i-th column serves as response
-    Xp <- X[,-i] # columns[-i] serve as predictors
+    Xp <- X[, -i, drop = F] # columns[-i] serve as predictors
 
     if (loop.count > 1) Xp <- cbind(knockoffs[,shf[1:(loop.count-1)]], Xp)
 
@@ -77,18 +77,36 @@ knockoffs_seq <- function(X, seq_simulator = sim_EN, ...) {
 #' plot(y, ysim)
 sim_EN <- function(y, X, ...) {
 
-  x <- model.matrix(~., data = X)[,-1]
+  if (ncol(X) == 1){
+    
+    # Use 1s in GLMnet instead of second variable
+    x <- model.matrix(~., data = X)
+    
+  } else {
+    
+    x <- model.matrix(~., data = X)[,-1]
+    
+  }
 
   if (is.factor(y)) {
 
     classes <- levels(y)
 
     K <- length(classes)
-
+    
     gm.cv <- glmnet::cv.glmnet(y=y, x=x, family="multinomial", intercept=TRUE, ...)
 
     # Beta coefficients (excluding intercept)
-    beta.coefs <- as.numeric(coef(gm.cv, s = "lambda.min")[[2]])[-1]
+    if (ncol(X) == 1){
+      
+      # Drop out dummy coefficient
+      beta.coefs <- as.numeric(coef(gm.cv, s = "lambda.min")[[2]])[-c(1,2)]
+      
+    } else {
+      
+      beta.coefs <- as.numeric(coef(gm.cv, s = "lambda.min")[[2]])[-1]
+      
+    }
 
     mu <- predict(gm.cv, newx=x, type="response", s="lambda.min")
 
@@ -107,7 +125,7 @@ sim_EN <- function(y, X, ...) {
     gm.cv <- glmnet::cv.glmnet(y=y, x=x, family="gaussian", intercept=TRUE, ...)
 
     # Beta coefficients (excluding intercept)
-    beta.coefs <- as.numeric(coef(gm.cv, s = "lambda.min"))[-1]
+    beta.coefs <- as.numeric(coef(gm.cv, s = "lambda.min"))[-c(1,2)]
 
     # columns of predictor matrix corresponding to non-zero beta.coefs:
     non.zero.cols <- which(beta.coefs != 0)

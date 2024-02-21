@@ -35,7 +35,7 @@ check_design <- function(X, method="seq") {
   }
 
   if(method=="seq" & ncol(X)<=2) {
-    stop("X should have ncol(X) > 2")
+    warning("X should have ncol(X) > 2")
   }
 
   if(method=="seq" & sum(!unlist(lapply(X, class)) %in% c("factor", "numeric")) > 0) {
