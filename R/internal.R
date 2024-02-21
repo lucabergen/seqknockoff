@@ -34,10 +34,6 @@ check_design <- function(X, method="seq") {
     stop("X should be either a data.frame or tibble")
   }
 
-  if(method=="seq" & ncol(X)<=2) {
-    warning("X should have ncol(X) > 2")
-  }
-
   if(method=="seq" & sum(!unlist(lapply(X, class)) %in% c("factor", "numeric")) > 0) {
     stop("X should only contain columns of class 'numeric' or 'factor'")
   }
