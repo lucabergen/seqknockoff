@@ -35,7 +35,7 @@ knockoffs_seq <- function(X, seq_simulator = sim_EN, ...) {
   for (i in shf) {
 
     y <- X[[i]] # i-th column serves as response
-    Xp <- X[, -i, drop = F] # columns[-i] serve as predictors
+    Xp <- subset(X, select = -i) # columns[-i] serve as predictors
 
     if (loop.count > 1) Xp <- cbind(knockoffs[,shf[1:(loop.count-1)]], Xp)
 
